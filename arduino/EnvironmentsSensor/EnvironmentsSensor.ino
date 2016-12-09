@@ -1,40 +1,34 @@
+#define SERIAL_SPEED    9600
+#define INTERVAL_MILLIS  500
+
 #include <Wire.h>
 
-// LPS331 I2C気圧センサー
-#include <LPS331.h>
-LPS331 lps;
+// LPS331AP/LPS25H I2C気圧センサー
+#include "LPS.h"
+LPS lps;
 
-// DHT11 デジタル温湿度センサー
-#include "DHT11.h"
-#define DHT11_PIN 13
-DHT11 dht(DHT11_PIN);
+// HDC1000 I2C温度湿度センサー
+#include "HDC1000.h"
+HDC1000 hdc;
 
-// AS-SS アナログ音量センサー
-#define SS_PIN A0
-
-// 風速センサー
-#define WIND_PIN A1
-
-// 照度センサー（CdS）
-#define LIGHT_PIN A2
-
-#define SERIAL_SPEED 115200
-#define INTERVAL_MILLIS 500
+// 照度センサー（NJL7502L）
+#define LIGHT_PIN A0
 
 
 void setup() {
   Serial.begin(SERIAL_SPEED);
+  Serial.println("Start");
+
   Wire.begin();
 
-  if (!lps.init()) {
+  if (! lps.init(LPS::device_auto, LPS::sa0_auto)) {
     Serial.println("Failed to autodetect pressure sensor!");
-    while (1);
   }
-
   lps.enableDefault();
 
-  pinMode(SS_PIN, INPUT);
-  pinMode(WIND_PIN, INPUT);
+  hdc.init();
+
+  pinMode(LIGHT_PIN, INPUT);
 }
 
 
@@ -45,28 +39,21 @@ void loop() {
   Serial.print(++seq);
 
   float pressure = lps.readPressureMillibars();
-  float altitude = lps.pressureToAltitudeMeters(pressure);
-  float temperature = lps.readTemperatureC();
-
   Serial.print(",\"p\":");
   Serial.print(pressure);
 
-  Serial.print(",\"a\":");
-  Serial.print(altitude);
-
+  float temperature = hdc.getTemperature();
+  if (temperature == HDC1000_ERROR_CODE) {
+      temperature = lps.readTemperatureC();
+  }
   Serial.print(",\"t\":");
   Serial.print(temperature);
 
-  if (dht.read()) {
-    Serial.print(",\"h\":");
-    Serial.print(dht.humidity);
+  float humidity = hdc.getHumidity();
+  if (humidity != HDC1000_ERROR_CODE) {
+      Serial.print(",\"h\":");
+      Serial.print(humidity);
   }
-
-  Serial.print(",\"s\":");
-  Serial.print(analogRead(SS_PIN));
-
-  Serial.print(",\"w\":");
-  Serial.print(analogRead(WIND_PIN));
 
   Serial.print(",\"l\":");
   Serial.print(analogRead(LIGHT_PIN));
