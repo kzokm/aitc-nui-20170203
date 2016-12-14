@@ -1,2 +1,4 @@
-node_modules
-log/
+/config.coffee
+
+/node_modules
+/log
