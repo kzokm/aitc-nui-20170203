@@ -1,4 +1,10 @@
+# Ignore application config.
 /config.coffee
 
+# Ignore node modules.
 /node_modules
-/log
+
+# Ignore all logfiles and tempfiles.
+/log/*
+!/log/.keep
+/tmp
