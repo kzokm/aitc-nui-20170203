@@ -14,3 +14,10 @@ Arduinoで測定したデータを収集するプログラムです。
 3. config.coffee ファイルを各自の動作環境に合わせて書き直してください(COMポートなど）
 4. node index.js でサーバが起動します
 5. logディレクトリ下に測定データファイルが保存されます
+
+## ./get-sleeps
+UP3で記録した睡眠データを取得するプログラムです。
+
+http://get-sleeps.herokuapp.com/
+
+にアクセスしてください。
